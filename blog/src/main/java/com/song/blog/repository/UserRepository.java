@@ -1,6 +1,7 @@
 package com.song.blog.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.song.blog.model.User;
@@ -12,3 +13,13 @@ public interface UserRepository extends JpaRepository<User, Integer>{
 	
 	
 }
+
+
+//JPA Naming 쿼리 전략
+	// Select * From user Where username = ? And password = ?;
+	// User findByUsernameAndPassword(String username, String password);
+	
+	/*
+	 * @Query(value = "Select * From user Where username = ? And password = ?",
+	 * nativeQuery = true) User login(String username, String passwrod);
+	 */
