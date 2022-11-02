@@ -27,6 +27,15 @@ public class UserService {
 	@Autowired
 	private AuthenticationManager authenticationManager;
 	
+	@Transactional(readOnly = true)
+	public User 회원찾기(String username) {
+		
+		User user = userRepository.findByUsername(username).orElseGet(()->{
+			return new User();
+		});
+		return user;
+	}
+	
 	@Transactional
 	public void 회원가입(User user) {
 		String rawPassword = user.getPassword();		// 원문 비밀번호
@@ -45,10 +54,13 @@ public class UserService {
 			return new IllegalArgumentException("회원 찾기 실패");
 		});
 		
-		String rawPassword = user.getPassword();
-		String encPassword = encoder.encode(rawPassword);
-		persistance.setPassword(encPassword);
-		persistance.setEmail(user.getEmail());	
+		// Validate 체크
+		if(persistance.getOauth() == null || persistance.getOauth().equals("")) {
+			String rawPassword = user.getPassword();
+			String encPassword = encoder.encode(rawPassword);
+			persistance.setPassword(encPassword);
+			persistance.setEmail(user.getEmail());	
+		}
 
 		//세션 등록
 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
