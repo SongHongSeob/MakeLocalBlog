@@ -10,10 +10,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.song.blog.dto.ReplySaveRequestDto;
 import com.song.blog.model.Board;
+import com.song.blog.model.Reply;
 import com.song.blog.model.RoleType;
 import com.song.blog.model.User;
 import com.song.blog.repository.BoardRepository;
+import com.song.blog.repository.ReplyRepository;
 import com.song.blog.repository.UserRepository;
 
 // 스프링이 컴포넌트 스캔을 통해서 Bean에 등록을 해줌(IoC를 해준다.)
@@ -24,7 +27,13 @@ public class BoardService {
 	private BoardRepository boardRepository;
 	
 	@Autowired
+	private UserRepository userRepository;
+	
+	@Autowired
 	private BCryptPasswordEncoder encoder;
+	
+	@Autowired
+	private ReplyRepository replyRepository;
 	
 	@Transactional
 	public void 글쓰기(Board board, User user) {
@@ -61,6 +70,35 @@ public class BoardService {
 		board.setTitle(requestBoard.getTitle());
 		board.setContent(requestBoard.getContent());
 		// 해당 함수로 종료시(Service가 종료될 떄) 드랜잭션이 종료된다. 이떄 더티체킹이 이루어져 자동업데이트가 진행됨. DB flush 진행
+	}
+	
+	@Transactional
+	public void 댓글쓰기(ReplySaveRequestDto replySaveRequestDto) {
+		
+		/*
+		 * User user =
+		 * userRepository.findById(replySaveRequestDto.getUserId()).orElseThrow(()->{
+		 * return new IllegalArgumentException("댓글 쓰기 실패 : 사용자의 id를 칮을 수 없습니다."); });
+		 * //영속화 완료
+		 * 
+		 * Board board =
+		 * boardRepository.findById(replySaveRequestDto.getBoardId()).orElseThrow(()->{
+		 * return new IllegalArgumentException("댓글 쓰기 실패 : 게시글 id를 칮을 수 없습니다."); });
+		 * //영속화 완료
+		 * 
+		 * Reply reply = new Reply();
+		 * 
+		 * reply.update(user, board, replySaveRequestDto.getContent());
+		 * 
+		 * replyRepository.save(reply);
+		 */
+		
+		int result = replyRepository.mSave(replySaveRequestDto.getUserId(), replySaveRequestDto.getBoardId(), replySaveRequestDto.getContent());
+	}
+	
+	@Transactional
+	public void 댓글삭제(int replyId) {
+		replyRepository.deleteById(replyId);
 	}
 	
 	/*
